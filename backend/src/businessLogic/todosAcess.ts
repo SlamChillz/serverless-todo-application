@@ -19,9 +19,9 @@ export class TodosAccess {
   /*
    * Method to get all todos from database
    */
-  getUserTodosById: Promise<TodoItem[]> = async (userId: String) => {
+  getUserTodosById: Promise<TodoItem[]> = async (userId: string) => {
     logger.info(`Querying database for all todos by user ${userId}`)
-    const params = {
+    const params: object = {
       TableName: this.Table-todos,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
