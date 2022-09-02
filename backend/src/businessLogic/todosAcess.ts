@@ -58,7 +58,7 @@ export class TodosAccess {
   async function updateTodoById(userId: string, todoId: string, updates: TodoUpdate): Promise<boolean> {
     const todoExists = await this.exists(userId, todoId)
     if (!todoExists)
-	return (false)
+	return false
     logger.info(`Updating todo with id ${todoId} with ${updates}`)
     const {name, dueDate, done} = updates
     const params = {
@@ -84,7 +84,7 @@ export class TodosAccess {
   async function deleteTodoById(userId: string, todoId, string): Promise<boolean> {
     const todoExists = await this.exists(userId, todoId)
     if (!todoExists)
-      return (false)
+      return false
     logger.info(`Deleting todo with id ${todoId} owned by ${userId}`)
     const params = {
       TableName: this.Table-todos,
@@ -95,19 +95,43 @@ export class TodosAccess {
   }
 
   /**
+   * Updates todo item with image attachment
+   * @param userId
+   * @param todoId
+   * @param imageUrl
+   * @return boolean
+   */
+  async function updateTodoAttachment(userId: string, todoId: string, imageUrl: string): Promise<boolean> {
+    const todoExists = await this.exists(userId, todoId)
+    if (!todoExists)
+      return false
+    logger.info(`Updating attachment for todo ${todoId} owned by ${userId}`)
+    const params = {
+      TableName: this.Table-todos,
+      Key: {userId, todoId},
+      UpdateExpression: 'set attachmentUrl = :atturl'
+      ExpressionAttributeValues: {
+	':atturl': imageUrl
+      }
+    }
+    const attachmentUpdated = await this.doClient.update(params).promise()
+    return attachmentUpdated ? true : false
+  }
+
+  /**
    * Checks if a todo exist for a particular user id
    * @param userId
    * @param todoId
    * @return boolean, true if it exists else false
    */
   static async function exists(userId: string, todoId: string): <boolean> {
-     logger.info(`Checking if todo with id ${todoId} exist for user ${userId}`)
-     const params = {
-	TableName: this.Table-todos,
-	Key: {userId, todoId}
-     }
-     const todo = await this.doClient.get(params).promise()
-     return !!todo.item
+    logger.info(`Checking if todo with id ${todoId} exist for user ${userId}`)
+    const params = {
+      TableName: this.Table-todos,
+      Key: {userId, todoId}
+    }
+    const todo = await this.doClient.get(params).promise()
+    return !!todo.item
   }
 }
 

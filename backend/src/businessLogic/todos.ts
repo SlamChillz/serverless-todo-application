@@ -9,8 +9,8 @@ import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
 const logger = createLogger('Todos')
-
 const todoAccess = new TodosAccess()
+const imagesBucketName = process.env.ATTACHMENT_S3_BUCKET
 
 /**
  * Get todos for a single user by Id
@@ -76,4 +76,27 @@ export const deleteTodo = async (
 ): Promise<boolean> => {
   logger.info(`Calling delete for user ${userId} on todo ${todoId}`)
   return await todoAccess.deleteTodoById(userId, todoId)
+}
+
+/**
+ * Adds image attachment to an existing todo item
+ * @param userId
+ * @param todoId
+ */
+export const createAttachmentPresignedUrl = async (
+  userId: string,
+  todoId: string
+): Promise<boolean> => {
+  logger.info(`Updating attachment url for todo ${todoId} owned by ${userId}`)
+  const imageId = `${userId}-${todoId}`
+  const imageUrl = `https://${imagesBucketName}.s3.amazonaws.com/${imageId}`
+  const attached = await todoAccess.updateTodoAttachment(
+    userId,
+    todoId,
+    imageUrl
+  )
+  if (attached) {
+    return await AttachmentUtils(imageUrl)
+  }
+  return null
 }
