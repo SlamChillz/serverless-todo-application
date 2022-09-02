@@ -33,7 +33,7 @@ export const createTodo = async (
   userId: string,
   newTodoRequest: CreateTodoRequest
 ): Promise<TodoItem> => {
-  logger.info(`Creating new todo for user ${userId} with-> ${newTodoRequest}`)
+  logger.info(`Creating new todo for user ${userId}`)
   const { name: string, dueDate: string } = newTodoRequest
   const todoId: string = uuid.v4()
   const createdAt: string = new Date().toISOString()
@@ -48,4 +48,19 @@ export const createTodo = async (
   }
   newTodo = await todoAccess.createTodo(newItem)
   return newTodo as TodoItem
+}
+
+/**
+ * Updates an existing todo
+ * @param userId
+ * @param todoId
+ * @param updateData
+ */
+export const updateTodo = async (
+  userId: string,
+  todoId: string,
+  updateData: updateTodorequest
+): Promise<boolean> => {
+  logger.info(`Calling update for user ${userId} on todo ${todoId}`)
+  return await todoAccess.updateTodoById(userId, todoId, updateData)
 }
