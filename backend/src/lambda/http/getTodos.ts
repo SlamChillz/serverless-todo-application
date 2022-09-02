@@ -1,5 +1,4 @@
 import 'source-map-support/register'
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
@@ -19,7 +18,7 @@ export const handler = middy(
     return {
 	    statusCode: 200,
 	    headers: {
-		    'Access-Control-Allow-Origin': "*",
+		    'Access-Control-Allow-Origin': "*"
 	    }
 	    body: JSON.stringify({
 		    items: todos
