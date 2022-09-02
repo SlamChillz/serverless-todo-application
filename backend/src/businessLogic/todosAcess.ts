@@ -23,7 +23,7 @@ export class TodosAccess {
    */
   async function getUserTodosById(userId: string): Promise<TodoItem[]> {
     logger.info(`Querying database for all todos by user ${userId}`)
-    const params: object = {
+    const params = {
       TableName: this.Table-todos,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
@@ -32,7 +32,7 @@ export class TodosAccess {
       ScanIndexForward: false
     }
     const userTodos = await this.doClient.query(params).promise()
-    return (userTodos.item) as TodoItem[]
+    return userTodos.item as TodoItem[]
   }
 
   /**
@@ -46,7 +46,51 @@ export class TodosAccess {
 	TableName: this.Table-todos,
 	Item: newTodo
      }).promise()
-     return (newTodo) as TodoItem
+     return newTodo as TodoItem
+  }
+
+  /**
+   * Updates a todo item
+   * @param userId
+   * @param todoId
+   * @param updates, an object of new data to be updated
+   */
+  async function updateTodoById(userId: string, todoId: string, updates: TodoUpdate): Promise<boolean> {
+     const todoExists = await this.exists(userId, todoId)
+     if (!todoExists)
+	return (false)
+     logger.info(`Updating todo with id ${todoId} with ${updates}`)
+     const {name, dueDate, done} = updates
+     const params = {
+	Tablename: this.Table-todos,
+	Key: {userId, todoId},
+	UpdateExpression: 'set #n = :n, #d = :d, #dd = :dd',
+	ExpressionAttributeNames: {
+	  '#n' : 'name', '#d' : 'done', '#dd' : 'dueDate'
+	}
+	ExpressionAttributeValues: {
+	  ':n' : name, ':d' : done, ':dd' : dueDate
+	}
+     }
+     const data = await this.doClient.update(params).promise()
+     return data ? true : false
+  }
+
+
+  /**
+   * Checks if a todo exist for a particular user id
+   * @param userId
+   * @param todoId
+   * @return boolean, true if it exists else false
+   */
+  static async function exists(userId: string, todoId: string): <boolean> {
+     logger.info(`Checking if todo with id ${todoId} exist for user ${userId}`)
+     const params = {
+	TableName: this.Table-todos,
+	Key: {userId, todoId}
+     }
+     const todo = await this.doClient.get(params).promise()
+     return !!todo.item
   }
 }
 
