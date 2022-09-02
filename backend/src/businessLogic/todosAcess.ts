@@ -16,10 +16,12 @@ export class TodosAccess {
     private readonly Table-todos = process.env.TODOS_TABLE
   ) {}
 
-  /*
+  /**
    * Method to get all todos from database
+   * @param userId, id of user gotten from auth token
+   * @return a list of TodoItems
    */
-  getUserTodosById: Promise<TodoItem[]> = async (userId: string) => {
+  async function getUserTodosById(userId: string): Promise<TodoItem[]> {
     logger.info(`Querying database for all todos by user ${userId}`)
     const params: object = {
       TableName: this.Table-todos,
@@ -32,12 +34,26 @@ export class TodosAccess {
     const userTodos = await this.doClient.query(params).promise()
     return (userTodos.item) as TodoItem[]
   }
+
+  /**
+   * Create a new Todo
+   * @param TodoItem object
+   * @return TodItem
+   */
+  async function createTodo(newTodo: TodoItem): Promise<TodoItem> {
+     logger.info(`Inserting a new todo data ${newTodo}`)
+     await this.doClient.put({
+	TableName: this.Table-todos,
+	Item: newTodo
+     }).promise()
+     return (newTodo) as TodoItem
+  }
 }
 
 /**
  * Create a database client
  */
-function createDynamoDBClient() {
+function createDynamoDBClient() => {
   if (process.env.IS_OFFLINE) {
     logger.info('Creating a local DynamoDB instance')
     return new XAWS.DynamoDB.DocumentClient({
