@@ -64,3 +64,16 @@ export const updateTodo = async (
   logger.info(`Calling update for user ${userId} on todo ${todoId}`)
   return await todoAccess.updateTodoById(userId, todoId, updateData)
 }
+
+/**
+ * Deletes an exiting todo
+ * @param userId
+ * @param todoId
+ */
+export const deleteTodo = async (
+  userId: string,
+  todoId: string
+): Promise<boolean> => {
+  logger.info(`Calling delete for user ${userId} on todo ${todoId}`)
+  return await todoAccess.deleteTodoById(userId, todoId)
+}
