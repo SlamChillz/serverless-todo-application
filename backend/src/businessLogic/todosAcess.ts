@@ -56,26 +56,43 @@ export class TodosAccess {
    * @param updates, an object of new data to be updated
    */
   async function updateTodoById(userId: string, todoId: string, updates: TodoUpdate): Promise<boolean> {
-     const todoExists = await this.exists(userId, todoId)
-     if (!todoExists)
+    const todoExists = await this.exists(userId, todoId)
+    if (!todoExists)
 	return (false)
-     logger.info(`Updating todo with id ${todoId} with ${updates}`)
-     const {name, dueDate, done} = updates
-     const params = {
-	Tablename: this.Table-todos,
-	Key: {userId, todoId},
-	UpdateExpression: 'set #n = :n, #d = :d, #dd = :dd',
-	ExpressionAttributeNames: {
-	  '#n' : 'name', '#d' : 'done', '#dd' : 'dueDate'
-	}
-	ExpressionAttributeValues: {
-	  ':n' : name, ':d' : done, ':dd' : dueDate
-	}
-     }
-     const data = await this.doClient.update(params).promise()
-     return data ? true : false
+    logger.info(`Updating todo with id ${todoId} with ${updates}`)
+    const {name, dueDate, done} = updates
+    const params = {
+      TableName: this.Table-todos,
+      Key: {userId, todoId},
+      UpdateExpression: 'set #n = :n, #d = :d, #dd = :dd',
+      ExpressionAttributeNames: {
+	'#n' : 'name', '#d' : 'done', '#dd' : 'dueDate'
+      }
+      ExpressionAttributeValues: {
+	':n' : name, ':d' : done, ':dd' : dueDate
+      }
+    }
+    const data = await this.doClient.update(params).promise()
+    return data ? true : false
   }
 
+  /**
+   * Deletes a todo item
+   * @param userId
+   * @param todoId
+   */
+  async function deleteTodoById(userId: string, todoId, string): Promise<boolean> {
+    const todoExists = await this.exists(userId, todoId)
+    if (!todoExists)
+      return (false)
+    logger.info(`Deleting todo with id ${todoId} owned by ${userId}`)
+    const params = {
+      TableName: this.Table-todos,
+      Key: {userId, todoId},
+    }
+    const deleted = await this.doClient.delete(params).promise()
+    return deleted ? true : false
+  }
 
   /**
    * Checks if a todo exist for a particular user id
